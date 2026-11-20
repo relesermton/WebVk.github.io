@@ -3,8 +3,8 @@
 A **Vulkan-shaped API in JavaScript** with a **wasm-gc core** — hand-assembled
 to a `.wasm` binary with **zero npm dependencies** (no wabt, no binaryen, no
 bundler). The core contains a **software rasterizer** that draws into linear
-memory; presentation happens entirely on the JS side via a **WebRTC canvas
-stream  Even you can tester or modify this project too tester :https://relesermton.github.io/WebVk.github.io/playground.html**.
+memory; presentation happens entirely on the JS side via a **WebRTC canvas stream
+**.   Even you can tester or modify this project too tester :https://relesermton.github.io/WebVk.github.io/playground.html
 
 ```
  ┌────────────────────────────── JS (src/webvk.js) ─────────────────────────────┐
