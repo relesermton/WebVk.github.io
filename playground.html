@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WebVk — Playground</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 1.5rem; background: #0d0f14; color: #cfd6e4;
+      font: 13px/1.55 ui-monospace, "Cascadia Code", Menlo, monospace;
+    }
+    header { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    h1 { font-size: 1.1rem; margin: 0; font-weight: 600; }
+    h1 span { color: #7aa2f7; }
+    header a { color: #6b7280; font-size: 11px; text-decoration: none; }
+    header a:hover { color: #7aa2f7; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1.5rem; align-items: start; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .stage { display: flex; gap: 1rem; flex-wrap: wrap; }
+    figure { margin: 0; }
+    figcaption { font-size: 10px; color: #6b7280; margin-top: .35rem; letter-spacing: .08em; text-transform: uppercase; }
+    canvas, video { display: block; width: 360px; height: 360px; background: #000; border: 1px solid #2a2f3a; object-fit: contain; }
+    canvas { image-rendering: pixelated; }
+    #stats { margin-top: .8rem; font-size: 11px; color: #8b93a7; white-space: pre-wrap; }
+    #stats b { color: #9ece6a; }
+    #err { margin-top: .8rem; color: #f7768e; white-space: pre-wrap; }
+    .panel { background: #12151d; border: 1px solid #222735; border-radius: 6px; padding: 1rem; }
+    .panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: #6b7280; margin: 0 0 .8rem; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: .7rem; margin-bottom: .6rem; }
+    .row label { color: #a9b2c3; flex: 0 0 96px; }
+    .row input[type=range] { flex: 1; min-width: 0; accent-color: #7aa2f7; }
+    .row output { flex: 0 0 42px; text-align: right; color: #9ece6a; }
+    select, input[type=color], button {
+      background: #1a1f2b; color: #cfd6e4; border: 1px solid #2a2f3a;
+      padding: .3rem .5rem; font: inherit; border-radius: 4px;
+    }
+    input[type=color] { width: 42px; height: 26px; padding: 2px; cursor: pointer; }
+    input[type=checkbox] { accent-color: #7aa2f7; width: 16px; height: 16px; }
+    .buttons { display: flex; gap: .5rem; margin-top: .9rem; }
+    button { flex: 1; cursor: pointer; }
+    button:hover { border-color: #7aa2f7; }
+    button.on { border-color: #9ece6a; color: #9ece6a; }
+    .colors { display: flex; gap: .5rem; }
+    .note { margin-top: 1.2rem; font-size: 11px; color: #6b7280; border-top: 1px solid #222735; padding-top: .8rem; }
+    .note code { color: #9ece6a; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span>WebVk</span> playground — tweak the pipeline live</h1>
+    <a href="demo.html">← demo</a>
+    <a href="README.md">README</a>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="stage">
+        <figure>
+          <canvas id="raw" width="128" height="128"></canvas>
+          <figcaption>swapchain image (blit)</figcaption>
+        </figure>
+        <figure>
+          <video id="presented" autoplay playsinline muted></video>
+          <figcaption>presented via WebRTC loopback</figcaption>
+        </figure>
+      </div>
+      <div id="stats">loading…</div>
+      <div id="err"></div>
+      <div class="note">
+        Static site friendly: every URL is relative — upload <code>dist/</code>,
+        <code>src/</code>, <code>demo/</code> and <code>playground/</code> as-is to any
+        static host (no build step, no server code). Only requirement: serve
+        <code>.wasm</code> as <code>application/wasm</code>.
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>presentation</h2>
+      <div class="buttons">
+        <button id="turbo" class="on">turbo: ON</button>
+        <button id="toggle">pause</button>
+      </div>
+
+      <h2 style="margin-top:1.2rem">animation</h2>
+      <div class="row"><label>speed</label><input id="speed" type="range" min="0" max="3" step="0.05" value="1"><output id="speed-v">1.00</output></div>
+      <div class="row"><label>x squeeze</label><input id="scale" type="range" min="0.1" max="1.5" step="0.05" value="0.5"><output id="scale-v">0.50</output></div>
+
+      <h2 style="margin-top:1.2rem">pipeline</h2>
+      <div class="row"><label>cull mode</label><select id="cull">
+        <option value="0">NONE</option><option value="1">FRONT</option>
+        <option value="2" selected>BACK</option><option value="3">FRONT_AND_BACK</option>
+      </select></div>
+      <div class="row"><label>depth test</label><input id="depth" type="checkbox" checked></div>
+      <div class="row"><label>blend</label><input id="blend" type="checkbox" checked></div>
+      <div class="row"><label>clear</label><input id="clear" type="color" value="#101826"></div>
+
+      <h2 style="margin-top:1.2rem">vertex colours</h2>
+      <div class="row"><label>v0</label><div class="colors"><input id="c0" type="color" value="#ff3333"></div></div>
+      <div class="row"><label>v1</label><div class="colors"><input id="c1" type="color" value="#33ff33"></div></div>
+      <div class="row"><label>v2</label><div class="colors"><input id="c2" type="color" value="#4d66ff"></div></div>
+
+      <div class="buttons"><button id="reset">reset</button></div>
+    </div>
+  </div>
+
+  <script type="module" src="./playground.js"></script>
+</body>
+</html>

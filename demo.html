@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebVk — wasm-gc software rasterizer</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; padding: 2rem; background: #0d0f14; color: #cfd6e4;
+      font: 14px/1.6 ui-monospace, "Cascadia Code", Menlo, monospace;
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+    h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em; margin: 0; }
+    h1 span { color: #7aa2f7; }
+    .stage { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+    figure { margin: 0; text-align: center; }
+    figcaption { font-size: 11px; color: #6b7280; margin-top: .4rem; text-transform: uppercase; letter-spacing: .1em; }
+    /* raw swapchain image (what the wasm-gc rasterizer wrote) */
+    #raw {
+      width: 320px; height: 320px; image-rendering: pixelated;
+      background: #000; border: 1px solid #2a2f3a;
+    }
+    /* the WebRTC-presented stream: WebVk's "swapchain" */
+    #presented {
+      width: 320px; height: 320px; background: #000;
+      border: 1px solid #2a2f3a; object-fit: cover;
+    }
+    #stats { font-size: 12px; color: #8b93a7; white-space: pre; }
+    #stats b { color: #9ece6a; font-weight: 600; }
+    button {
+      background: #1a1f2b; color: #cfd6e4; border: 1px solid #2a2f3a;
+      padding: .4rem 1rem; font: inherit; cursor: pointer; border-radius: 4px;
+    }
+    button:hover { border-color: #7aa2f7; }
+    button.on { border-color: #9ece6a; color: #9ece6a; }
+    .controls { display: flex; gap: .6rem; }
+    a { color: #7aa2f7; font-size: 12px; }
+    #err { color: #f7768e; white-space: pre-wrap; max-width: 60ch; }
+  </style>
+</head>
+<body>
+  <h1><span>WebVk</span> — Vulkan-shaped API · wasm-gc software rasterizer · WebRTC presentation</h1>
+
+  <div class="stage">
+    <figure>
+      <canvas id="raw" width="128" height="128"></canvas>
+      <figcaption>swapchain image (blit)</figcaption>
+    </figure>
+    <figure>
+      <video id="presented" autoplay playsinline muted></video>
+      <figcaption>presented (captureStream → loopback RTCPeerConnection → video)</figcaption>
+    </figure>
+  </div>
+
+  <div id="stats">loading…</div>
+  <div class="controls">
+    <button id="turbo" hidden class="on">turbo: ON</button>
+    <button id="toggle" hidden>pause</button>
+  </div>
+  <a href="playground.html">→ playground</a>
+  <div id="err"></div>
+
+  <script type="module" src="./demo.js"></script>
+</body>
+</html>
