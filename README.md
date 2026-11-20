@@ -1,4 +1,4 @@
-# WebVk (WebVulkan)
+# WebVk (WebVulkan3)
 
 A **Vulkan-shaped API in JavaScript** with a **wasm-gc core** — hand-assembled
 to a `.wasm` binary with **zero npm dependencies** (no wabt, no binaryen, no
